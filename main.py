@@ -4,15 +4,15 @@ from pydantic import BaseModel
 import google.generativeai as genai
 import os
 
-# ✅ CARGA CORRECTA DE API KEY DESDE RENDER
+# ✅ API KEY DESDE RENDER
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 app = FastAPI()
 
-# ✅ CORS TOTAL PARA QUE TU WEB SE PUEDA CONECTAR
+# ✅ CORS CORRECTO
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # podés restringir después
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,7 +23,7 @@ class Chat(BaseModel):
 
 @app.post("/chat")
 async def chat(data: Chat):
-    model = genai.GenerativeModel("gemini-pro")
+    model = genai.GenerativeModel("models/gemini-1.5-flash")
     response = model.generate_content(data.message)
     return {"reply": response.text}
 
