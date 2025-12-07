@@ -1,23 +1,29 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+import openai
 import os
-from google import genai
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 app = FastAPI()
 
-class Chat(BaseModel):
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+class ChatRequest(BaseModel):
     message: str
 
 @app.get("/")
-def root():
-    return {"status": "ok"}
+def home():
+    return {"status": "ok", "message": "API funcionando correctamente"}
 
 @app.post("/chat")
-def chat(data: Chat):
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=data.message
+def chat(data: ChatRequest):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "Eres un asistente útil."},
+            {"role": "user", "content": data.message}
+        ]
     )
-    return {"reply": response.text}
+
+    return {
+        "response": response["choices"][0]["message"]["content"]
+    }
