@@ -3,7 +3,8 @@ from pydantic import BaseModel
 import google.generativeai as genai
 import os
 
-genai.configure(api_key=os.getenv("AIzaSyBOd_7ezHiL1j_h2cLBTtJ23SBwYHykdGM"))
+# ✅ AQUÍ VA SOLO EL NOMBRE DE LA VARIABLE
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 app = FastAPI()
 
