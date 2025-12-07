@@ -24,7 +24,8 @@ class Chat(BaseModel):
 @app.post("/chat")
 async def chat(data: Chat):
     # ✅ MODELO NUEVO QUE TU API KEY SÍ SOPORTA
-    model = genai.GenerativeModel("models/gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-pro")
     response = model.generate_content(data.message)
     return {"reply": response.text}
+
 
