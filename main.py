@@ -26,4 +26,3 @@ async def chat(data: Chat):
     model = genai.GenerativeModel("models/gemini-1.5-flash")
     response = model.generate_content(data.message)
     return {"reply": response.text}
-
