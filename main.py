@@ -7,23 +7,25 @@ app = FastAPI()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-class ChatRequest(BaseModel):
+class Chat(BaseModel):
     message: str
 
 @app.get("/")
-def home():
+def root():
     return {"status": "ok", "message": "API funcionando correctamente"}
 
 @app.post("/chat")
-def chat(data: ChatRequest):
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "Eres un asistente útil."},
-            {"role": "user", "content": data.message}
-        ]
-    )
+def chat(data: Chat):
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Sos el asistente de Webnixia"},
+                {"role": "user", "content": data.message}
+            ]
+        )
 
-    return {
-        "response": response["choices"][0]["message"]["content"]
-    }
+        return {"reply": response.choices[0].message.content}
+
+    except Exception as e:
+        return {"error": str(e)}
