@@ -1,31 +1,33 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import openai
+from openai import OpenAI
 import os
 
 app = FastAPI()
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# ✅ CORS BIEN PUESTO (ANTES DE LAS RUTAS)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-class Chat(BaseModel):
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+class ChatRequest(BaseModel):
     message: str
 
-@app.get("/")
-def root():
-    return {"status": "ok", "message": "API funcionando correctamente"}
-
 @app.post("/chat")
-def chat(data: Chat):
-    try:
-        response = openai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "Sos el asistente de Webnixia"},
-                {"role": "user", "content": data.message}
-            ]
-        )
+def chat(data: ChatRequest):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Eres el asistente comercial de WEBNIXIA."},
+            {"role": "user", "content": data.message}
+        ]
+    )
 
-        return {"reply": response.choices[0].message.content}
-
-    except Exception as e:
-        return {"error": str(e)}
+    return {"reply": response.choices[0].message.content}
