@@ -4,15 +4,15 @@ from pydantic import BaseModel
 import google.generativeai as genai
 import os
 
-# ✅ Usar la variable de entorno de Render
+# ✅ Lee la API Key desde Render
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# ✅ Usar el modelo correcto y compatible
+# ✅ Modelo correcto que sí funciona
 model = genai.GenerativeModel("models/text-bison-001")
 
 app = FastAPI()
 
-# ✅ CORS para permitir llamadas desde tu web en Vercel
+# ✅ Permitir conexión desde tu web
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,3 +28,4 @@ class Chat(BaseModel):
 async def chat(data: Chat):
     response = model.generate_content(data.message)
     return {"reply": response.text}
+
