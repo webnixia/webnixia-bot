@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import google.generativeai as genai
 import os
 
-# ✅ Cargar API Key correctamente desde Render
+# ✅ Configurar API Key desde Render
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 
 app = FastAPI()
@@ -13,14 +13,13 @@ class Chat(BaseModel):
 
 @app.get("/")
 def root():
-    return {"status": "✅ WEBNIXIA BOT ACTIVO"}
+    return {"status": "✅ WEBNIXIA BOT ONLINE"}
 
 @app.post("/chat")
-async def chat(data: Chat):
+def chat(data: Chat):
     try:
-        model = genai.GenerativeModel("models/gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(data.message)
         return {"reply": response.text}
     except Exception as e:
         return {"error": str(e)}
-
