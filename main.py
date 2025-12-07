@@ -4,15 +4,15 @@ from pydantic import BaseModel
 import google.generativeai as genai
 import os
 
-# ✅ Lee la API Key desde Render
+# ✅ Usa la API Key de Render
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# ✅ Modelo correcto que sí funciona
-model = genai.GenerativeModel("models/text-bison-001")
+# ✅ MODELO CORRECTO Y ACTIVO
+model = genai.GenerativeModel("models/gemini-1.5-pro-latest")
 
 app = FastAPI()
 
-# ✅ Permitir conexión desde tu web
+# ✅ Permite que tu web se conecte
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
