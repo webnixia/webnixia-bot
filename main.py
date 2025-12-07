@@ -4,10 +4,12 @@ from pydantic import BaseModel
 import google.generativeai as genai
 import os
 
+# ✅ AHORA SÍ SE LEE BIEN LA VARIABLE DE ENTORNO DESDE RENDER
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 app = FastAPI()
 
+# ✅ CORS para que tu web en Vercel pueda acceder
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,4 +26,5 @@ async def chat(data: Chat):
     model = genai.GenerativeModel("gemini-pro")
     response = model.generate_content(data.message)
     return {"reply": response.text}
+
 
