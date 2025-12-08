@@ -4,10 +4,12 @@ from pydantic import BaseModel
 from openai import OpenAI
 from supabase import create_client
 import os
+import smtplib
+from email.message import EmailMessage
 
 app = FastAPI()
 
-# ✅ CORS BIEN CONFIGURADO
+# ✅ CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,7 +31,7 @@ class ContactRequest(BaseModel):
     tipo: str
     mensaje: str
 
-# ✅ FUNCIÓN PARA CREAR CLIENTE SUPABASE CUANDO SE NECESITA
+# ✅ SUPABASE
 def get_supabase():
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_KEY")
@@ -38,6 +40,32 @@ def get_supabase():
         raise Exception("Supabase credentials not loaded")
 
     return create_client(url, key)
+
+# ✅ FUNCIÓN PARA ENVIAR EMAIL AUTOMÁTICO
+def enviar_email_respuesta(destinatario, nombre):
+    msg = EmailMessage()
+    msg["Subject"] = "Recibimos tu consulta ✔️"
+    msg["From"] = os.getenv("EMAIL_USER")
+    msg["To"] = destinatario
+
+    msg.set_content(f"""
+Hola {nombre},
+
+Gracias por escribirnos a WEBNIXIA 🚀  
+Tu consulta ya fue recibida correctamente.
+
+Un asesor de nuestro equipo la está revisando y en breve se pondrá en contacto con vos para avanzar con tu proyecto.
+
+Mientras tanto, podés visitar nuestra web o escribirnos por WhatsApp si lo necesitás.
+
+Saludos,
+Equipo WEBNIXIA
+""")
+
+    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+    server.login(os.getenv("EMAIL_USER"), os.getenv("EMAIL_PASS"))
+    server.send_message(msg)
+    server.quit()
 
 # ✅ CHATBOT
 @app.post("/chat")
@@ -63,10 +91,10 @@ def chat(data: ChatRequest):
                     "Haz preguntas cortas, claras y vendedoras. "
 
                     "Reglas de DEMOS: "
-                    "• Restaurante, comida, hamburguesas, bar → https://demostracion-sigma.vercel.app/ "
-                    "• Gimnasio, gym, entrenamiento, fitness → https://gimnasio-beige.vercel.app/ "
-                    "• Carnicería, carne, asador → https://carniceria-gilt.vercel.app/ "
-                    "• Peluquería, barbería, cortes → https://peluqueria-six.vercel.app/ "
+                    "• Restaurante → https://demostracion-sigma.vercel.app/ "
+                    "• Gimnasio → https://gimnasio-beige.vercel.app/ "
+                    "• Carnicería → https://carniceria-gilt.vercel.app/ "
+                    "• Peluquería → https://peluqueria-six.vercel.app/ "
 
                     "Después de enviar el demo, SIEMPRE debes cerrar con este mensaje exacto: "
                     "'Si te gusta el diseño, escríbenos ahora mismo por WhatsApp y te explicamos todo sin compromiso: "
@@ -85,11 +113,12 @@ def chat(data: ChatRequest):
     return {"reply": response.output_text}
 
 
-# ✅ FORMULARIO → SUPABASE (GUARDADO REAL)
+# ✅ FORMULARIO → SUPABASE + EMAIL AUTOMÁTICO
 @app.post("/contact")
 def guardar_contacto(data: ContactRequest):
     supabase = get_supabase()
 
+    # ✅ GUARDA EN SUPABASE
     supabase.table("leads").insert({
         "nombre": data.nombre,
         "email": data.email,
@@ -97,4 +126,7 @@ def guardar_contacto(data: ContactRequest):
         "mensaje": data.mensaje
     }).execute()
 
-    return {"ok": True, "message": "Contacto guardado correctamente"}
+    # ✅ ENVÍA EMAIL AUTOMÁTICO AL CLIENTE
+    enviar_email_respuesta(data.email, data.nombre)
+
+    return {"ok": True, "message": "Contacto guardado y email enviado"}
