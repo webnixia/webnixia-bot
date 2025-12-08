@@ -43,10 +43,10 @@ def chat(data: ChatRequest):
     "Haz preguntas cortas, claras y vendedoras. "
 
     "Reglas de DEMOS: "
-    "• Restaurante, comida, hamburguesas, bar → https://demostracion-sigma.vercel.app"
-    "• Gimnasio, gym, entrenamiento, fitness → https://gimnasio-beige.vercel.app"
-    "• Carnicería, carne, asador → https://carniceria-gilt.vercel.app"
-    "• Peluquería, barbería, cortes → https://peluqueria-six.vercel.app"
+    "• Restaurante, comida, hamburguesas, bar → https://demostracion-sigma.vercel.app/"
+    "• Gimnasio, gym, entrenamiento, fitness → https://gimnasio-beige.vercel.app/"
+    "• Carnicería, carne, asador → https://carniceria-gilt.vercel.app/"
+    "• Peluquería, barbería, cortes → https://peluqueria-six.vercel.app/"
 
     "Después de enviar el demo, SIEMPRE debes cerrar con este mensaje exacto: "
     "'Si te gusta el diseño, escríbenos ahora mismo por WhatsApp y te explicamos todo sin compromiso: "
@@ -64,6 +64,7 @@ def chat(data: ChatRequest):
     )
 
     return {"reply": response.output_text}
+
 
 
 
