@@ -4,8 +4,11 @@ from pydantic import BaseModel
 from openai import OpenAI
 from supabase import create_client
 import os
+
+# ✅ EMAIL
 import smtplib
-from email.message import EmailMessage
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = FastAPI()
 
@@ -41,31 +44,33 @@ def get_supabase():
 
     return create_client(url, key)
 
-# ✅ FUNCIÓN PARA ENVIAR EMAIL AUTOMÁTICO
+# ✅ FUNCIÓN EMAIL AUTOMÁTICO
 def enviar_email_respuesta(destinatario, nombre):
-    msg = EmailMessage()
-    msg["Subject"] = "Recibimos tu consulta ✔️"
-    msg["From"] = os.getenv("EMAIL_USER")
-    msg["To"] = destinatario
+    remitente = os.getenv("EMAIL_USER")
+    password = os.getenv("EMAIL_PASS")
 
-    msg.set_content(f"""
+    mensaje = MIMEMultipart()
+    mensaje["From"] = remitente
+    mensaje["To"] = destinatario
+    mensaje["Subject"] = "✅ Recibimos tu consulta - WEBNIXIA"
+
+    cuerpo = f"""
 Hola {nombre},
 
-Gracias por escribirnos a WEBNIXIA 🚀  
-Tu consulta ya fue recibida correctamente.
+✅ Recibimos correctamente tu consulta y ya estamos revisando tu solicitud.
+En breve un asesor de nuestro equipo se va a contactar con vos.
 
-Un asesor de nuestro equipo la está revisando y en breve se pondrá en contacto con vos para avanzar con tu proyecto.
+Gracias por confiar en WEBNIXIA 🚀
+Desarrollo web profesional
+"""
 
-Mientras tanto, podés visitar nuestra web o escribirnos por WhatsApp si lo necesitás.
+    mensaje.attach(MIMEText(cuerpo, "plain"))
 
-Saludos,
-Equipo WEBNIXIA
-""")
-
-    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-    server.login(os.getenv("EMAIL_USER"), os.getenv("EMAIL_PASS"))
-    server.send_message(msg)
-    server.quit()
+    servidor = smtplib.SMTP("smtp.gmail.com", 587)
+    servidor.starttls()
+    servidor.login(remitente, password)
+    servidor.send_message(mensaje)
+    servidor.quit()
 
 # ✅ CHATBOT
 @app.post("/chat")
@@ -91,10 +96,10 @@ def chat(data: ChatRequest):
                     "Haz preguntas cortas, claras y vendedoras. "
 
                     "Reglas de DEMOS: "
-                    "• Restaurante → https://demostracion-sigma.vercel.app/ "
-                    "• Gimnasio → https://gimnasio-beige.vercel.app/ "
-                    "• Carnicería → https://carniceria-gilt.vercel.app/ "
-                    "• Peluquería → https://peluqueria-six.vercel.app/ "
+                    "• Restaurante, comida, hamburguesas, bar → https://demostracion-sigma.vercel.app/ "
+                    "• Gimnasio, gym, entrenamiento, fitness → https://gimnasio-beige.vercel.app/ "
+                    "• Carnicería, carne, asador → https://carniceria-gilt.vercel.app/ "
+                    "• Peluquería, barbería, cortes → https://peluqueria-six.vercel.app/ "
 
                     "Después de enviar el demo, SIEMPRE debes cerrar con este mensaje exacto: "
                     "'Si te gusta el diseño, escríbenos ahora mismo por WhatsApp y te explicamos todo sin compromiso: "
