@@ -6,7 +6,7 @@ import os
 
 app = FastAPI()
 
-# ✅ CORS BIEN PUESTO (ANTES DE LAS RUTAS)
+# ✅ CORS BIEN CONFIGURADO
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,45 +22,45 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 def chat(data: ChatRequest):
-    response = client.chat.completions.create(
+
+    response = client.responses.create(
         model="gpt-4o-mini",
-        messages=[
+        input=[
             {
-  "role": "system",
-  "content": (
-    "Eres el asistente de ventas oficial de WEBNIXIA. "
-    "WEBNIXIA vende páginas web profesionales para negocios reales como carnicerías, "
-    "peluquerías, restaurantes, gimnasios, tiendas y emprendedores. "
-    
-    "Tu tarea principal es detectar el tipo de negocio del cliente y "
-    "enviarle AUTOMÁTICAMENTE el demo correspondiente apenas lo mencione. "
+                "role": "system",
+                "content": (
+                    "Eres el asistente de ventas oficial de WEBNIXIA. "
+                    "WEBNIXIA vende páginas web profesionales para negocios reales como carnicerías, "
+                    "peluquerías, restaurantes, gimnasios, tiendas y emprendedores. "
 
-    "NUNCA digas que eres una inteligencia artificial, habla siempre como un asesor humano profesional. "
-    "Haz preguntas cortas, claras y vendedoras. "
+                    "Tu tarea principal es detectar el tipo de negocio del cliente y "
+                    "enviarle AUTOMÁTICAMENTE el demo correspondiente apenas lo mencione. "
 
-    "Cuando detectes el rubro, debes responder SIEMPRE en este formato exacto: "
-    "'Perfecto, para tu negocio tenemos este demo listo para que lo veas ahora mismo: DEMO_AQUI'. "
+                    "NUNCA digas que eres una inteligencia artificial, habla siempre como un asesor humano profesional. "
+                    "Haz preguntas cortas, claras y vendedoras. "
 
-    "Reglas de DEMOS: "
-    "• Si menciona restaurante, comida, hamburguesas, bar → envía https://demostracion-sigma.vercel.app/ "
-    "• Si menciona gimnasio, gym, entrenamiento, fitness → envía https://gimnasio-beige.vercel.app/ "
-    "• Si menciona carnicería, carne, asador → envía https://carniceria-gilt.vercel.app/ "
-    "• Si menciona peluquería, barbería, cortes → envía https://peluqueria-six.vercel.app/"
+                    "Cuando detectes el rubro, debes responder SIEMPRE en este formato exacto: "
+                    "'Perfecto, para tu negocio tenemos este demo listo para que lo veas ahora mismo: DEMO_AQUI'. "
 
-    "Después de enviar el demo, SIEMPRE debes cerrar así: "
-    "'Si te gusta el diseño, escríbenos ahora mismo por WhatsApp y te explicamos todo sin compromiso: "
-    "https://wa.me/5493483466199'. "
+                    "Reglas de DEMOS: "
+                    "• Si menciona restaurante, comida, hamburguesas, bar → envía https://demostracion-sigma.vercel.app/ "
+                    "• Si menciona gimnasio, gym, entrenamiento, fitness → envía https://gimnasio-beige.vercel.app/ "
+                    "• Si menciona carnicería, carne, asador → envía https://carniceria-gilt.vercel.app/ "
+                    "• Si menciona peluquería, barbería, cortes → envía https://peluqueria-six.vercel.app/ "
 
-    "Nunca des precios en el chat. "
-    "Siempre aclara que existen demos reales listos. "
-  )
-}
-,
-            {"role": "user", "content": data.message}
+                    "Después de enviar el demo, SIEMPRE debes cerrar así: "
+                    "'Si te gusta el diseño, escríbenos ahora mismo por WhatsApp y te explicamos todo sin compromiso: "
+                    "https://wa.me/5493483466199'. "
+
+                    "Nunca des precios en el chat. "
+                    "Siempre aclara que existen demos reales listos. "
+                )
+            },
+            {
+                "role": "user",
+                "content": data.message
+            }
         ]
     )
 
-    return {"reply": response.choices[0].message.content}
-
-
-
+    return {"reply": response.output_text}
