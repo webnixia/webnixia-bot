@@ -40,7 +40,8 @@ def chat(data: ChatRequest):
                     "Haz preguntas cortas, claras y vendedoras. "
 
                     "Cuando detectes el rubro, debes responder SIEMPRE en este formato exacto: "
-                    "'Perfecto, para tu negocio tenemos este demo listo para que lo veas ahora mismo: DEMO_AQUI'. "
+                    "Perfecto, esta es una página de demostración creada especialmente para un negocio como el tuyo. Ábrela y mírala con calma:
+LINK"
 
                     "Reglas de DEMOS: "
                     "• Si menciona restaurante, comida, hamburguesas, bar → envía https://demostracion-sigma.vercel.app/ "
@@ -64,3 +65,4 @@ def chat(data: ChatRequest):
     )
 
     return {"reply": response.output_text}
+
