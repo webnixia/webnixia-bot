@@ -19,11 +19,6 @@ app.add_middleware(
 # ✅ OPENAI
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# ✅ SUPABASE
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 # ✅ MODELOS
 class ChatRequest(BaseModel):
     message: str
@@ -33,6 +28,16 @@ class ContactRequest(BaseModel):
     email: str
     tipo: str
     mensaje: str
+
+# ✅ FUNCIÓN PARA CREAR CLIENTE SUPABASE CUANDO SE NECESITA
+def get_supabase():
+    url = os.getenv("SUPABASE_URL")
+    key = os.getenv("SUPABASE_KEY")
+
+    if not url or not key:
+        raise Exception("Supabase credentials not loaded")
+
+    return create_client(url, key)
 
 # ✅ CHATBOT
 @app.post("/chat")
@@ -80,9 +85,11 @@ def chat(data: ChatRequest):
     return {"reply": response.output_text}
 
 
-# ✅ FORMULARIO → SUPABASE
+# ✅ FORMULARIO → SUPABASE (GUARDADO REAL)
 @app.post("/contact")
 def guardar_contacto(data: ContactRequest):
+    supabase = get_supabase()
+
     supabase.table("leads").insert({
         "nombre": data.nombre,
         "email": data.email,
