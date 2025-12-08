@@ -4,11 +4,7 @@ from pydantic import BaseModel
 from openai import OpenAI
 from supabase import create_client
 import os
-
-# ✅ EMAIL
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
 
 app = FastAPI()
 
@@ -44,33 +40,30 @@ def get_supabase():
 
     return create_client(url, key)
 
-# ✅ FUNCIÓN EMAIL AUTOMÁTICO
+# ✅ EMAIL AUTOMÁTICO CON RESEND (FUNCIONA EN RENDER)
 def enviar_email_respuesta(destinatario, nombre):
-    remitente = os.getenv("EMAIL_USER")
-    password = os.getenv("EMAIL_PASS")
+    api_key = os.getenv("RESEND_API_KEY")
 
-    mensaje = MIMEMultipart()
-    mensaje["From"] = remitente
-    mensaje["To"] = destinatario
-    mensaje["Subject"] = "✅ Recibimos tu consulta - WEBNIXIA"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
 
-    cuerpo = f"""
-Hola {nombre},
+    data = {
+        "from": "WEBNIXIA <onboarding@resend.dev>",
+        "to": [destinatario],
+        "subject": "✅ Recibimos tu consulta - WEBNIXIA",
+        "html": f"""
+        <h2>Hola {nombre}</h2>
+        <p>✅ Recibimos correctamente tu consulta y ya estamos revisando tu solicitud.</p>
+        <p>En breve un asesor de nuestro equipo se va a contactar con vos.</p>
+        <br>
+        <b>WEBNIXIA</b><br>
+        Desarrollo web profesional 🚀
+        """
+    }
 
-✅ Recibimos correctamente tu consulta y ya estamos revisando tu solicitud.
-En breve un asesor de nuestro equipo se va a contactar con vos.
-
-Gracias por confiar en WEBNIXIA 🚀
-Desarrollo web profesional
-"""
-
-    mensaje.attach(MIMEText(cuerpo, "plain"))
-
-    servidor = smtplib.SMTP("smtp.gmail.com", 587)
-    servidor.starttls()
-    servidor.login(remitente, password)
-    servidor.send_message(mensaje)
-    servidor.quit()
+    requests.post("https://api.resend.com/emails", headers=headers, json=data)
 
 # ✅ CHATBOT
 @app.post("/chat")
@@ -117,7 +110,6 @@ def chat(data: ChatRequest):
 
     return {"reply": response.output_text}
 
-
 # ✅ FORMULARIO → SUPABASE + EMAIL AUTOMÁTICO
 @app.post("/contact")
 def guardar_contacto(data: ContactRequest):
@@ -131,7 +123,7 @@ def guardar_contacto(data: ContactRequest):
         "mensaje": data.mensaje
     }).execute()
 
-    # ✅ ENVÍA EMAIL AUTOMÁTICO AL CLIENTE
+    # ✅ ENVÍA EMAIL AUTOMÁTICO REAL
     enviar_email_respuesta(data.email, data.nombre)
 
     return {"ok": True, "message": "Contacto guardado y email enviado"}
